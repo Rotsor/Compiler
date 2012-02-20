@@ -1,0 +1,1 @@
+nasm -felf output.asm && gcc -m32 output.o && time ./a.out

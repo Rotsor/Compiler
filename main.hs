@@ -143,8 +143,8 @@ compile :: Program -> (Map String [Instruction])
 compile = foldl compile1 Map.empty
 
 
-params = [40]
-func = "fib"
+params = [4, 1]
+func = "ack"
 
 main = do
   prefix <- readFile "prefix.asm"

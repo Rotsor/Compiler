@@ -1,1 +1,2 @@
 fib x = x ? ((x-1) ? (fib (x-1) + fib (x-2)) : 1) : 1
+ack m n = m ? (n ? ack (m-1) (ack (m) (n-1)) : ack (m-1) 1) : n + 1
