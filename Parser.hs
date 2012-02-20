@@ -23,18 +23,7 @@ definition = mkDef <$> identifier <*> parameterList <* char  '=' <*> expression 
   parameterList :: ReadP [String]
   parameterList = many (w1 *> identifier) <* w
 
-application p = AppE <$> (w *> identifier) <*> (many (w1 *> p) <* w)
-
-hacke :: Expression -> Expression
-hacke (AppE n []) = VarE n
-hacke (AppE n e) = AppE n (map hacke e)
-hacke (PrimE n e) = PrimE n (map hacke e)
-hacke (CondE c t f) = CondE (hacke c) (hacke t) (hacke f)
-hacke (LitE n) = LitE n
-
-hack :: Program -> Program
-hack = map hackq
-hackq (n, (p, b)) = (n, (p, hacke b))
+application p = AppE <$> (w *> identifier) <*> (many1 (w1 *> p) <* w)
 
 expression :: ReadP Expression
 expression = p_cond where
@@ -49,11 +38,11 @@ expression = p_cond where
         +++ return a)
     p_mul = ((\a b -> PrimE MulP [a, b]) <$> (p_app <* char '*') <*> p_mul) +++ p_app
     p_app = application p_var +++ p_var
-    p_var = w *> ((LitE . read) <$> many1 (satisfy isDigit)) +++ p_paren <* w
+    p_var = w *> (((LitE . read) <$> many1 (satisfy isDigit)) +++ p_paren +++ (VarE <$> identifier)) <* w
     p_paren = (char '(' *> p_cond <* char ')')
 
 parser :: ReadP Program
 parser = many (definition <* char '\n') <* eof
 
 parseFile fileName = readFile fileName >>= \t -> case readP_to_S parser t of
-  ((r, []):_) -> return (hack r)
+  ((r, []):_) -> return r
